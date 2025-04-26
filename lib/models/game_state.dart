@@ -9,11 +9,14 @@ class GameState extends ChangeNotifier {
   final List<int> _gameScore = List<int>.generate(13, (int index) => 0, growable: false);
   // Current dice values
   final List<int> _diceValue = List<int>.generate(2, (int index) => Random().nextInt(6) + 1, growable: false);
-
+  // Animation state
+  bool _isRolling = false;
+  
   // Getters to expose state
   List<int> get gameGrid => List.unmodifiable(_gameGrid);
   List<int> get gameScore => List.unmodifiable(_gameScore);
   List<int> get diceValue => List.unmodifiable(_diceValue);
+  bool get isRolling => _isRolling;
 
   // Update score when a cell is filled
   void updateScore(int caseId, int caseValue) {
@@ -122,11 +125,43 @@ class GameState extends ChangeNotifier {
     return scored ? score : -5;
   }
 
-  // Roll the dice
-  void rollDice() {
-    _diceValue[0] = Random().nextInt(6) + 1;
-    _diceValue[1] = Random().nextInt(6) + 1;
+  // Start the dice rolling animation
+  void startRolling() {
+    _isRolling = true;
     notifyListeners();
+  }
+  
+  // Stop the dice rolling animation and set final values
+  void stopRolling(List<int> finalValues) {
+    _diceValue[0] = finalValues[0];
+    _diceValue[1] = finalValues[1];
+    _isRolling = false;
+    notifyListeners();
+  }
+  
+  // Generate random dice values during animation
+  List<int> getRandomDiceValues() {
+    return [
+      Random().nextInt(6) + 1,
+      Random().nextInt(6) + 1
+    ];
+  }
+
+  // Roll the dice with animation
+  void rollDice() {
+    startRolling();
+    
+    // Generate final values
+    final finalValues = [
+      Random().nextInt(6) + 1,
+      Random().nextInt(6) + 1
+    ];
+    
+    // We'll handle the actual animation in the DiceSection widget
+    // but we generate and store the final values here
+    Future.delayed(const Duration(milliseconds: 1500), () {
+      stopRolling(finalValues);
+    });
   }
 
   // Clear the game grid and scores
@@ -171,4 +206,3 @@ class GameState extends ChangeNotifier {
     return neighbors.any((pos) => _gameGrid[pos] == 0);
   }
 }
-
