@@ -18,12 +18,16 @@ class DropTargetCell extends StatelessWidget {
     final gameState = Provider.of<GameState>(context);
     final screenSize = MediaQuery.of(context).size;
     final screenAspectRatio = screenSize.width / screenSize.height;
+    final brightness = Theme.of(context).brightness;
+    
+    // Get theme-aware symbols
+    final themeAwareSymbols = GameSymbols.getSymbols(brightness);
     
     final gridSize = screenAspectRatio < 0.657
         ? (screenSize.width - 20) / 7
         : (0.657 * screenSize.height - 20) / 7;
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = brightness == Brightness.dark;
     final darkerBackground = isDarkMode
         ? Color.alphaBlend(Colors.white.withAlpha(0x11), Theme.of(context).colorScheme.surface)
         : Color.alphaBlend(Colors.black.withAlpha(0x11), Theme.of(context).colorScheme.surface);
@@ -83,11 +87,8 @@ class DropTargetCell extends StatelessWidget {
           scale: 0.5,
           alignment: Alignment.center,
           child: Image(
-            image: GameSymbols.symbols[
-              GameSymbols.symbols.indexWhere(
-                (symbol) => symbol.id == gameState.gameGrid[position],
-              )
-            ].image,
+            // Use theme-aware symbols for the dragged feedback
+            image: themeAwareSymbols[gameState.gameGrid[position]].image,
           ),
         ),
       ),
@@ -104,11 +105,7 @@ class DropTargetCell extends StatelessWidget {
             child: Center(
               child: Image(
                 // Afficher la version grise (ID + 6) du même symbole
-                image: GameSymbols.symbols[
-                  GameSymbols.symbols.indexWhere(
-                    (symbol) => symbol.id == gameState.gameGrid[position] + 6,
-                  )
-                ].image,
+                image: themeAwareSymbols[gameState.gameGrid[position] + 6].image,
               ),
             ),
           ),
@@ -141,11 +138,8 @@ class DropTargetCell extends StatelessWidget {
               child: FittedBox(
                 child: Center(
                   child: Image(
-                    image: GameSymbols.symbols[
-                      GameSymbols.symbols.indexWhere(
-                        (symbol) => symbol.id == gameState.gameGrid[position],
-                      )
-                    ].image,
+                    // Use theme-aware symbols for the main display
+                    image: themeAwareSymbols[gameState.gameGrid[position]].image,
                   ),
                 ),
               ),
