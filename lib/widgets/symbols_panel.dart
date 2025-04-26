@@ -23,7 +23,7 @@ class SymbolsPanel extends StatelessWidget {
       child: Card(
         color: Theme.of(context).colorScheme.background,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           mainAxisSize: MainAxisSize.min,
           children: [
             for (int i = 1; i < 7; i++)

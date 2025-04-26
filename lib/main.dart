@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
-import 'package:sliding_switch/sliding_switch.dart';
 
 import 'models/game_state.dart';
 import 'screens/game_screen.dart';

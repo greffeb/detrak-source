@@ -14,15 +14,23 @@ class GameScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    
     return Scaffold(
+      backgroundColor: theme.colorScheme.surfaceVariant,
       appBar: _buildAppBar(context),
-      body: const GameBoard(),
+      body: Center(
+        child: const GameBoard(),
+      ),
     );
   }
 
   AppBar _buildAppBar(BuildContext context) {
     final theme = Theme.of(context);
     return AppBar(
+      backgroundColor: theme.colorScheme.background, // Match the symbols panel background color
+      centerTitle: false, // Align title to the left
+      automaticallyImplyLeading: false, // Remove the back button
       title: Text(
         'DÉTRAK',
         style: theme.textTheme.headlineMedium?.copyWith(
@@ -33,7 +41,7 @@ class GameScreen extends StatelessWidget {
       ),
       actions: [
         Padding(
-          padding: const EdgeInsets.only(right: 30.0),
+          padding: const EdgeInsets.only(right: 16.0),
           child: SlidingSwitch(
             value: true,
             width: 100,
@@ -60,7 +68,7 @@ class GameScreen extends StatelessWidget {
           ),
         ),
         Padding(
-          padding: const EdgeInsets.only(right: 30.0),
+          padding: const EdgeInsets.only(right: 16.0),
           child: ClearButton(),
         ),
       ],

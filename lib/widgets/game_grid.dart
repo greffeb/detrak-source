@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../models/game_state.dart';
 import 'drop_target_cell.dart';
 
 class GameGrid extends StatelessWidget {

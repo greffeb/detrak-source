@@ -20,6 +20,11 @@ class GameBoard extends StatelessWidget {
     final gridSize = screenAspectRatio < 0.657
         ? (screenSize.width - 20) / 7
         : (0.657 * screenSize.height - 20) / 7;
+        
+    // Calculate the width of 7 cells for constraining child widgets
+    final rowWidth = screenAspectRatio < 0.657
+        ? (screenSize.width - 20)
+        : (0.657 * screenSize.height - 20);
 
     return ColoredBox(
       color: colorScheme.surfaceVariant,
@@ -27,7 +32,7 @@ class GameBoard extends StatelessWidget {
         padding: const EdgeInsets.all(10),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.center, // Changed from stretch to center
           children: [
             Column(
               children: [
@@ -68,7 +73,11 @@ class GameBoard extends StatelessWidget {
                 const ScoreRowDisplay(),
               ],
             ),
-            const SymbolsPanel(),
+            // Wrap SymbolsPanel in a SizedBox with controlled width
+            SizedBox(
+              width: rowWidth,
+              child: const SymbolsPanel(),
+            ),
             const DiceSection(),
             const SizedBox(height: 0),
           ],

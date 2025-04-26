@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
-import '../models/game_state.dart';
 import 'score_cell.dart';
 
 class ScoreColumnDisplay extends StatelessWidget {
