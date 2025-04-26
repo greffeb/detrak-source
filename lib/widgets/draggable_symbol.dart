@@ -12,6 +12,9 @@ class DraggableSymbol extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final themeAwareSymbols = GameSymbols.getSymbols(brightness);
+    
     return Expanded(
       child: FittedBox(
         child: Draggable<int>(
@@ -28,7 +31,10 @@ class DraggableSymbol extends StatelessWidget {
           ),
           childWhenDragging: Center(
             child: Image(
-              image: GameSymbols.symbols[symbol.id + 6].image,
+              image: themeAwareSymbols.firstWhere(
+                (s) => s.id == symbol.id + 6,
+                orElse: () => GameSymbols.symbols[symbol.id + 6],
+              ).image,
             ),
           ),
           child: Center(

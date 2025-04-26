@@ -17,15 +17,19 @@ class DropTargetCell extends StatelessWidget {
     final gameState = Provider.of<GameState>(context);
     final screenSize = MediaQuery.of(context).size;
     final screenAspectRatio = screenSize.width / screenSize.height;
+    final brightness = Theme.of(context).brightness;
     
     final gridSize = screenAspectRatio < 0.657
         ? (screenSize.width - 20) / 7
         : (0.657 * screenSize.height - 20) / 7;
 
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+    final isDarkMode = brightness == Brightness.dark;
     final darkerBackground = isDarkMode
         ? Color.alphaBlend(Colors.white.withAlpha(0x11), Theme.of(context).colorScheme.surface)
         : Color.alphaBlend(Colors.black.withAlpha(0x11), Theme.of(context).colorScheme.surface);
+
+    // Get the theme-aware symbols
+    final themeAwareSymbols = GameSymbols.getSymbols(brightness);
 
     // Check if this is a diagonal cell
     final isDiagonalCell = (position == 4 || position == 8 || position == 12 || position == 16 || position == 20);
@@ -49,8 +53,8 @@ class DropTargetCell extends StatelessWidget {
               child: FittedBox(
                 child: Center(
                   child: Image(
-                    image: GameSymbols.symbols[
-                      GameSymbols.symbols.indexWhere(
+                    image: themeAwareSymbols[
+                      themeAwareSymbols.indexWhere(
                         (symbol) => symbol.id == gameState.gameGrid[position],
                       )
                     ].image,

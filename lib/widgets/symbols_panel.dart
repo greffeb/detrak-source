@@ -9,10 +9,14 @@ class SymbolsPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
     final screenAspectRatio = screenSize.width / screenSize.height;
+    final brightness = Theme.of(context).brightness;
     
     final symbolSize = screenAspectRatio < 0.657
         ? (screenSize.width - 20) / 6
         : (0.657 * screenSize.height - 20) / 6;
+        
+    // Get theme-aware symbols
+    final themeAwareSymbols = GameSymbols.getSymbols(brightness);
 
     return SizedBox(
       height: symbolSize,
@@ -23,7 +27,7 @@ class SymbolsPanel extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             for (int i = 1; i < 7; i++)
-              DraggableSymbol(symbol: GameSymbols.symbols[i]),
+              DraggableSymbol(symbol: themeAwareSymbols[i]),
           ],
         ),
       ),

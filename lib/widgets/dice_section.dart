@@ -105,10 +105,14 @@ class _DiceSectionState extends State<DiceSection> with SingleTickerProviderStat
     final theme = Theme.of(context);
     final screenSize = MediaQuery.of(context).size;
     final screenAspectRatio = screenSize.width / screenSize.height;
+    final brightness = theme.brightness;
     
     final rollSize = screenAspectRatio < 0.657
         ? (screenSize.width - 20) / 5
         : (0.657 * screenSize.height - 20) / 5;
+    
+    // Get theme-aware symbols
+    final themeAwareSymbols = GameSymbols.getSymbols(brightness);
     
     // Listen for state changes to start animation
     if (gameState.isRolling && !_animationController.isAnimating) {
@@ -148,7 +152,7 @@ class _DiceSectionState extends State<DiceSection> with SingleTickerProviderStat
             child: Row(
               children: [
                 DraggableSymbol(
-                  symbol: GameSymbols.symbols[displayValues[0]],
+                  symbol: themeAwareSymbols[displayValues[0]],
                 ),
               ],
             ),
@@ -162,7 +166,7 @@ class _DiceSectionState extends State<DiceSection> with SingleTickerProviderStat
             child: Row(
               children: [
                 DraggableSymbol(
-                  symbol: GameSymbols.symbols[displayValues[1]],
+                  symbol: themeAwareSymbols[displayValues[1]],
                 ),
               ],
             ),

@@ -15,6 +15,7 @@ class GameBoard extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     final screenSize = MediaQuery.of(context).size;
     final screenAspectRatio = screenSize.width / screenSize.height;
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
     
     final gridSize = screenAspectRatio < 0.657
         ? (screenSize.width - 20) / 7
@@ -37,9 +38,11 @@ class GameBoard extends StatelessWidget {
                     SizedBox(
                       height: gridSize * 5,
                       width: gridSize,
-                      child: const FittedBox(
+                      child: FittedBox(
                         child: Center(
-                          child: Image(image: AssetImage('assets/titre.png')),
+                          child: Image(
+                            image: AssetImage(isDarkMode ? 'assets/titreWhite.png' : 'assets/titre.png'),
+                          ),
                         ),
                       ),
                     ),
@@ -48,9 +51,11 @@ class GameBoard extends StatelessWidget {
                         SizedBox(
                           height: gridSize,
                           width: gridSize * 5,
-                          child: const FittedBox(
+                          child: FittedBox(
                             child: Center(
-                              child: Image(image: AssetImage('assets/score.png')),
+                              child: Image(
+                                image: AssetImage(isDarkMode ? 'assets/scoreWhite.png' : 'assets/score.png'),
+                              ),
                             ),
                           ),
                         ),
