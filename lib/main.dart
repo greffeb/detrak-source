@@ -23,7 +23,7 @@ class MyApp extends StatelessWidget {
         ),
         dark: ThemeData(
           useMaterial3: true,
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.lightBlue, brightness: Brightness.dark),
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange, brightness: Brightness.dark),
         ),
         initial: AdaptiveThemeMode.light,
         builder: (theme, darkTheme) => MaterialApp(
