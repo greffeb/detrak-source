@@ -20,9 +20,24 @@ class GameState extends ChangeNotifier {
 
   // Update score when a cell is filled
   void updateScore(int caseId, int caseValue) {
-    // Return early if the cell is already filled
-    if (_gameGrid[caseId] != 0) return;
+    // If we're just clearing the cell (caseValue == 0)
+    if (caseValue == 0) {
+      _gameGrid[caseId] = 0;
+      _calculateAllScores();
+      notifyListeners();
+      return;
+    }
     
+    // If the cell is already filled
+    if (_gameGrid[caseId] != 0) {
+      // We're replacing a symbol with another symbol
+      _gameGrid[caseId] = caseValue;
+      _calculateAllScores();
+      notifyListeners();
+      return;
+    }
+    
+    // Normal case - placing a new symbol in an empty cell
     _gameScore[12] = 0; // Reset total score
     _gameGrid[caseId] = caseValue;
     
@@ -123,6 +138,26 @@ class GameState extends ChangeNotifier {
     
     // If no matches found, return -5
     return scored ? score : -5;
+  }
+
+  // Move a symbol from one cell to another
+  void moveSymbol(int fromPosition, int toPosition) {
+    if (fromPosition == toPosition) return; // No change needed
+    
+    // Get the symbol at the source position
+    final symbol = _gameGrid[fromPosition];
+    if (symbol == 0) return; // Nothing to move
+    
+    // Clear the source position
+    _gameGrid[fromPosition] = 0;
+    
+    // Place the symbol at the target position
+    _gameGrid[toPosition] = symbol;
+    
+    // Recalculate scores
+    _calculateAllScores();
+    
+    notifyListeners();
   }
 
   // Start the dice rolling animation

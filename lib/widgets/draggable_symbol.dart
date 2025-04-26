@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/symbol.dart';
+import '../models/symbol_data.dart';
 import '../utils/constants.dart';
 
 class DraggableSymbol extends StatelessWidget {
@@ -12,16 +13,14 @@ class DraggableSymbol extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    final themeAwareSymbols = GameSymbols.getSymbols(brightness);
-    
     return Expanded(
       child: FittedBox(
-        child: Draggable<int>(
+        child: Draggable<SymbolData>(
           dragAnchorStrategy: (draggable, context, position) {
             return Offset(draggable.feedbackOffset.dx + 70, draggable.feedbackOffset.dy + 85);
           },
-          data: symbol.id,
+          // Use -1 for sourcePosition to indicate it's from the symbol panel
+          data: SymbolData(symbolId: symbol.id, sourcePosition: -1),
           feedback: Center(
             child: Transform.scale(
               scale: 0.5,
@@ -31,10 +30,7 @@ class DraggableSymbol extends StatelessWidget {
           ),
           childWhenDragging: Center(
             child: Image(
-              image: themeAwareSymbols.firstWhere(
-                (s) => s.id == symbol.id + 6,
-                orElse: () => GameSymbols.symbols[symbol.id + 6],
-              ).image,
+              image: GameSymbols.symbols[symbol.id + 6].image,
             ),
           ),
           child: Center(
