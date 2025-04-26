@@ -75,69 +75,78 @@ class GameState extends ChangeNotifier {
 
   // Compute score for a line (row, column or diagonal)
   int _computeScore(int a, int b, int c, int d, int e) {
-    // If any cell is empty, return 0
-    if (a == 0 || b == 0 || c == 0 || d == 0 || e == 0) return 0;
-    
+    // Modified to allow partially filled lines to score
     int score = 0;
     bool scored = false;
     
-    // 5 identical symbols
-    if (a == b && b == c && c == d && d == e) {
+    // 5 identical symbols (all cells must be filled)
+    if (a != 0 && a == b && b == c && c == d && d == e) {
       return 10;
     }
     
     // 4 identical symbols
-    if ((a == b && b == c && c == d) || (b == c && c == d && d == e)) {
+    if (a != 0 && b != 0 && c != 0 && d != 0 && a == b && b == c && c == d) {
+      return 8;
+    }
+    if (b != 0 && c != 0 && d != 0 && e != 0 && b == c && c == d && d == e) {
       return 8;
     }
     
     // 3 identical symbols in the middle
-    if (b == c && c == d) {
+    if (b != 0 && c != 0 && d != 0 && b == c && c == d) {
       return 3;
     }
     
     // 3 identical symbols at the beginning
-    if (a == b && b == c) {
+    if (a != 0 && b != 0 && c != 0 && a == b && b == c) {
       score += 3;
       scored = true;
       // Plus 2 identical symbols at the end
-      if (d == e) {
+      if (d != 0 && e != 0 && d == e) {
         score += 2;
       }
       return score;
     }
     
     // 3 identical symbols at the end
-    if (c == d && d == e) {
+    if (c != 0 && d != 0 && e != 0 && c == d && d == e) {
       score += 3;
       scored = true;
       // Plus 2 identical symbols at the beginning
-      if (a == b) {
+      if (a != 0 && b != 0 && a == b) {
         score += 2;
       }
       return score;
     }
     
-    // Check for pairs
-    if (a == b) {
+    // Check for pairs (2 identical symbols)
+    if (a != 0 && b != 0 && a == b) {
       score += 2;
       scored = true;
     }
-    if (b == c) {
+    if (b != 0 && c != 0 && b == c) {
       score += 2;
       scored = true;
     }
-    if (c == d) {
+    if (c != 0 && d != 0 && c == d) {
       score += 2;
       scored = true;
     }
-    if (d == e) {
+    if (d != 0 && e != 0 && d == e) {
       score += 2;
       scored = true;
     }
     
-    // If no matches found, return -5
-    return scored ? score : -5;
+    // If we have scored something, return the score
+    if (scored) {
+      return score;
+    }
+    
+    // Check if all cells in the line are filled
+    bool allFilled = a != 0 && b != 0 && c != 0 && d != 0 && e != 0;
+    
+    // If all cells are filled but no matches found, return -5
+    return allFilled ? -5 : 0;
   }
 
   // Move a symbol from one cell to another
