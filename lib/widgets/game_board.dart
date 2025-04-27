@@ -1,7 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-import '../models/game_state.dart';
 import 'game_grid.dart';
 import 'score_display.dart';
 import 'dice_section.dart';

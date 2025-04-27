@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:adaptive_theme/adaptive_theme.dart';
 import 'package:sliding_switch/sliding_switch.dart';
 
-import '../models/game_state.dart';
 import '../widgets/game_board.dart';
-import '../widgets/dice_section.dart';
-import '../widgets/symbols_panel.dart';
 import '../widgets/clear_button.dart';
 
 class GameScreen extends StatelessWidget {

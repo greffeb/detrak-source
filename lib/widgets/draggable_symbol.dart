@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Add this import
 import '../models/symbol.dart';
 import '../models/symbol_data.dart';
 import '../utils/constants.dart';
@@ -19,6 +20,10 @@ class DraggableSymbol extends StatelessWidget {
     return Expanded(
       child: FittedBox(
         child: Draggable<SymbolData>(
+          // Add onDragStarted callback for haptic feedback
+          onDragStarted: () {
+            HapticFeedback.selectionClick(); // Light vibration when starting to drag
+          },
           dragAnchorStrategy: (draggable, context, position) {
             return Offset(draggable.feedbackOffset.dx + 70, draggable.feedbackOffset.dy + 85);
           },

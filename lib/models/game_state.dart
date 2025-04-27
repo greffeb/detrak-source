@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Add this import
 
 class GameState extends ChangeNotifier {
   // Game grid with 25 cells (5x5)
@@ -11,6 +12,8 @@ class GameState extends ChangeNotifier {
   final List<int> _diceValue = List<int>.generate(2, (int index) => Random().nextInt(6) + 1, growable: false);
   // Animation state
   bool _isRolling = false;
+  // Previous total score to detect significant changes
+  int _previousTotalScore = 0;
   
   // Getters to expose state
   List<int> get gameGrid => List.unmodifiable(_gameGrid);
@@ -33,6 +36,10 @@ class GameState extends ChangeNotifier {
       // We're replacing a symbol with another symbol
       _gameGrid[caseId] = caseValue;
       _calculateAllScores();
+      
+      // Check if score changed significantly
+      _checkScoreChange();
+      
       notifyListeners();
       return;
     }
@@ -44,7 +51,25 @@ class GameState extends ChangeNotifier {
     // Recalculate all scores
     _calculateAllScores();
     
+    // Check if score changed significantly
+    _checkScoreChange();
+    
     notifyListeners();
+  }
+
+  // Helper method to check if score changed significantly
+  void _checkScoreChange() {
+    // If score increased by more than 2 points, provide feedback
+    if (_gameScore[12] > _previousTotalScore + 2) {
+      HapticFeedback.mediumImpact(); // Stronger vibration for significant improvement
+    } 
+    // If score decreased, provide different feedback
+    else if (_gameScore[12] < _previousTotalScore) {
+      HapticFeedback.vibrate(); // Stronger vibration for score decrease
+    }
+    
+    // Update previous score
+    _previousTotalScore = _gameScore[12];
   }
 
   // Calculate all row, column, and diagonal scores
@@ -166,6 +191,9 @@ class GameState extends ChangeNotifier {
     // Recalculate scores
     _calculateAllScores();
     
+    // Check if score changed significantly
+    _checkScoreChange();
+    
     notifyListeners();
   }
 
@@ -210,12 +238,19 @@ class GameState extends ChangeNotifier {
 
   // Clear the game grid and scores
   void clearGrid() {
+    // Add haptic feedback when clearing the grid
+    HapticFeedback.heavyImpact();
+    
     for (int i = 0; i < _gameScore.length; i++) {
       _gameScore[i] = 0;
     }
     for (int i = 0; i < _gameGrid.length; i++) {
       _gameGrid[i] = 0;
     }
+    
+    // Reset previous score
+    _previousTotalScore = 0;
+    
     notifyListeners();
   }
 

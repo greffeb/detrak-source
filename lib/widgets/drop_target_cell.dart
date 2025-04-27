@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Add this import
 import 'package:provider/provider.dart';
 
 import '../models/game_state.dart';
@@ -59,6 +60,9 @@ class DropTargetCell extends StatelessWidget {
         },
         onWillAccept: (data) => true,
         onAccept: (SymbolData data) {
+          // Add haptic feedback when dropping
+          HapticFeedback.lightImpact();
+          
           if (data.sourcePosition == position) return; // No change if same position
           
           // If it's a symbol from another cell on the grid, move it
@@ -121,6 +125,9 @@ class DropTargetCell extends StatelessWidget {
         // We'll use a simple check - if the offset is very far from the grid, consider it outside
         final gridRect = _calculateGridRect(context);
         if (!gridRect.contains(offset)) {
+          // Add haptic feedback when dropping outside
+          HapticFeedback.mediumImpact();
+          
           // Delete the symbol if dropped outside the grid
           gameState.updateScore(position, 0);
         }
@@ -148,6 +155,9 @@ class DropTargetCell extends StatelessWidget {
         },
         onWillAccept: (data) => true,
         onAccept: (SymbolData data) {
+          // Add haptic feedback when accepting a dropped item
+          HapticFeedback.lightImpact();
+          
           // If being dropped on itself, do nothing
           if (data.sourcePosition == position) return;
           

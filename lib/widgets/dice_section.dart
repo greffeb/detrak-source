@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart'; // Add this import
 import 'package:provider/provider.dart';
 import 'dart:async';
 
@@ -17,6 +18,7 @@ class _DiceSectionState extends State<DiceSection> with SingleTickerProviderStat
   late AnimationController _animationController;
   late Timer _animationTimer;
   List<int> _currentAnimationValues = [1, 1];
+  List<int> _previousAnimationValues = [1, 1]; // Track previous values to detect changes
   int _slowdownFactor = 1; // Starts fast, will increase to slow down
   
   @override
@@ -36,6 +38,8 @@ class _DiceSectionState extends State<DiceSection> with SingleTickerProviderStat
     _animationController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         _stopDiceAnimation();
+        // Add haptic feedback when dice rolling stops
+        HapticFeedback.mediumImpact();
       }
     });
   }
@@ -50,7 +54,11 @@ class _DiceSectionState extends State<DiceSection> with SingleTickerProviderStat
   }
   
   void _startDiceAnimation() {
+    // Add haptic feedback when starting dice roll
+    HapticFeedback.mediumImpact();
+    
     _slowdownFactor = 1;
+    _previousAnimationValues = [1, 1];
     _animationController.reset();
     _animationController.forward();
     
@@ -60,6 +68,17 @@ class _DiceSectionState extends State<DiceSection> with SingleTickerProviderStat
         setState(() {
           final gameState = Provider.of<GameState>(context, listen: false);
           _currentAnimationValues = gameState.getRandomDiceValues();
+          
+          // Check if values have changed and provide haptic feedback if they have
+          if (_currentAnimationValues[0] != _previousAnimationValues[0] || 
+              _currentAnimationValues[1] != _previousAnimationValues[1]) {
+            // Add light haptic feedback when dice face changes
+            // Use lightImpact for a subtle effect during rapid changes
+            HapticFeedback.selectionClick();
+            
+            // Update previous values
+            _previousAnimationValues = List.from(_currentAnimationValues);
+          }
         });
       }
     });
@@ -88,6 +107,16 @@ class _DiceSectionState extends State<DiceSection> with SingleTickerProviderStat
         setState(() {
           final gameState = Provider.of<GameState>(context, listen: false);
           _currentAnimationValues = gameState.getRandomDiceValues();
+          
+          // Check if values have changed and provide haptic feedback if they have
+          if (_currentAnimationValues[0] != _previousAnimationValues[0] || 
+              _currentAnimationValues[1] != _previousAnimationValues[1]) {
+            // Use lighter impact as the animation slows down for more distinct feedback
+            HapticFeedback.selectionClick();
+            
+            // Update previous values
+            _previousAnimationValues = List.from(_currentAnimationValues);
+          }
         });
       }
     });
