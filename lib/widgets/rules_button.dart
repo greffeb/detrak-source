@@ -25,7 +25,7 @@ class RulesButton extends StatelessWidget {
             "Règles du jeu",
             textAlign: TextAlign.center,
             style: theme.textTheme.titleLarge?.copyWith(
-              fontSize: 25,
+              fontSize: 22,
               color: theme.colorScheme.primary,
               fontWeight: FontWeight.bold,
             ),
@@ -35,39 +35,34 @@ class RulesButton extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildRuleSection(
+                _buildRuleIcon(
                   theme,
-                  "But du jeu",
-                  "Lancez les dés et notez les symboles obtenus dans votre grille pour marquer le plus possible de points.",
+                  Icons.flag,
+                  "But du jeu: Marquer un maximum de points en plaçant des symboles dans la grille.",
                 ),
-                const SizedBox(height: 16),
-                _buildRuleSection(
+                const Divider(),
+                _buildRuleIcon(
                   theme,
-                  "Mise en place",
-                  "Chaque joueur choisit un des six symboles possibles et le place dans la case en haut à gauche de sa grille. Veillez à ce que chaque joueur choisisse un symbole différent.",
+                  Icons.grid_on,
+                  "Départ: Chaque joueur choisit un symbole différent et le place en haut à gauche.",
                 ),
-                const SizedBox(height: 16),
-                _buildRuleSection(
+                const Divider(),
+                _buildRuleIcon(
                   theme,
-                  "Déroulement",
-                  "À chaque tour, placez les deux symboles des dés sur des cases adjacentes (horizontalement ou verticalement) de votre grille.",
+                  Icons.casino,
+                  "À chaque tour, placez les deux symboles des dés sur des cases adjacentes.",
                 ),
-                const SizedBox(height: 16),
-                _buildRuleSection(
+                const Divider(),
+                _buildRuleIcon(
                   theme,
-                  "Score",
-                  "• 2 symboles identiques adjacents = 2 points\n"
-                  "• 3 symboles identiques adjacents = 3 points\n"
-                  "• 4 symboles identiques adjacents = 8 points\n"
-                  "• 5 symboles identiques adjacents = 10 points",
+                  Icons.calculate,
+                  "Scores: symboles identiques adjacents rapportent des points: 2 = 2pts, 3 = 3pts, 4 = 8pts, 5 = 10pts",
                 ),
-                const SizedBox(height: 16),
-                _buildRuleSection(
+                const Divider(),
+                _buildRuleIcon(
                   theme,
-                  "Règles avancées",
-                  "• Les cases de la diagonale (grisées) comptent double\n"
-                  "• Une ligne ou colonne sans points fait perdre 5 points\n\n"
-                  "Note: Vous pouvez activer ou désactiver les règles avancées avec le commutateur dans la barre du haut (icône bébé pour règles simples, icône cerveau pour règles avancées).",
+                  Icons.psychology,
+                  "Mode avancé: Cases diagonales = score double, Ligne/colonne sans points = -5pts",
                 ),
               ],
             ),
@@ -92,23 +87,22 @@ class RulesButton extends StatelessWidget {
     );
   }
 
-  Widget _buildRuleSection(ThemeData theme, String title, String content) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          title,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: theme.colorScheme.primary,
+  Widget _buildRuleIcon(ThemeData theme, IconData icon, String content) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, color: theme.colorScheme.primary, size: 24),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              content,
+              style: theme.textTheme.bodyMedium,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          content,
-          style: theme.textTheme.bodyMedium,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

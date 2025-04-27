@@ -76,102 +76,111 @@ class DropTargetCell extends StatelessWidget {
       );
     }
     
-    // If the cell has a symbol, make it draggable on long press
-    return LongPressDraggable<SymbolData>(
-      data: SymbolData(
-        symbolId: gameState.gameGrid[position],
-        sourcePosition: position,
-      ),
-      delay: const Duration(milliseconds: 250), // Réduire le temps d'appui long à 0,5s
-      dragAnchorStrategy: (draggable, context, position) {
-        return Offset(draggable.feedbackOffset.dx + 70, draggable.feedbackOffset.dy + 85);
+    // If the cell has a symbol, make it draggable on long press and add double tap to remove
+    return GestureDetector(
+      onDoubleTap: () {
+        // Add haptic feedback when removing a symbol
+        HapticFeedback.mediumImpact();
+        
+        // Clear the cell by setting its value to 0
+        gameState.updateScore(position, 0);
       },
-      feedback: Center(
-        child: Transform.scale(
-          scale: 0.5,
-          alignment: Alignment.center,
-          child: Image(
-            // Use theme-aware symbols for the dragged feedback
-            image: themeAwareSymbols[gameState.gameGrid[position]].image,
-          ),
+      child: LongPressDraggable<SymbolData>(
+        data: SymbolData(
+          symbolId: gameState.gameGrid[position],
+          sourcePosition: position,
         ),
-      ),
-      // Afficher l'icône grise à l'emplacement d'origine pendant le déplacement
-      childWhenDragging: SizedBox(
-        height: gridSize,
-        width: gridSize,
-        child: Card(
-          margin: const EdgeInsets.all(2.0),
-          color: isDiagonalCell
-              ? darkerBackground
-              : Theme.of(context).colorScheme.surface,
-          child: FittedBox(
-            child: Center(
-              child: Image(
-                // Afficher la version grise (ID + 6) du même symbole
-                image: themeAwareSymbols[gameState.gameGrid[position] + 6].image,
-              ),
+        delay: const Duration(milliseconds: 250), // Réduire le temps d'appui long à 0,5s
+        dragAnchorStrategy: (draggable, context, position) {
+          return Offset(draggable.feedbackOffset.dx + 70, draggable.feedbackOffset.dy + 85);
+        },
+        feedback: Center(
+          child: Transform.scale(
+            scale: 0.5,
+            alignment: Alignment.center,
+            child: Image(
+              // Use theme-aware symbols for the dragged feedback
+              image: themeAwareSymbols[gameState.gameGrid[position]].image,
             ),
           ),
         ),
-      ),
-      onDragCompleted: () {
-        // This is called when the drag is completed and accepted by a DragTarget
-        // The target cell will handle updating the game state
-        // We don't need to clear here as that's handled in the moveSymbol method
-      },
-      onDraggableCanceled: (velocity, offset) {
-        // Check if the drag was released outside of the game grid
-        // We'll use a simple check - if the offset is very far from the grid, consider it outside
-        final gridRect = _calculateGridRect(context);
-        if (!gridRect.contains(offset)) {
-          // Add haptic feedback when dropping outside
-          HapticFeedback.mediumImpact();
-          
-          // Delete the symbol if dropped outside the grid
-          gameState.updateScore(position, 0);
-        }
-      },
-      child: DragTarget<SymbolData>(
-        builder: (context, accepted, rejected) {
-          return SizedBox(
-            height: gridSize,
-            width: gridSize,
-            child: Card(
-              margin: const EdgeInsets.all(2.0),
-              color: isDiagonalCell
-                  ? darkerBackground
-                  : Theme.of(context).colorScheme.surface,
-              child: FittedBox(
-                child: Center(
-                  child: Image(
-                    // Use theme-aware symbols for the main display
-                    image: themeAwareSymbols[gameState.gameGrid[position]].image,
-                  ),
+        // Afficher l'icône grise à l'emplacement d'origine pendant le déplacement
+        childWhenDragging: SizedBox(
+          height: gridSize,
+          width: gridSize,
+          child: Card(
+            margin: const EdgeInsets.all(2.0),
+            color: isDiagonalCell
+                ? darkerBackground
+                : Theme.of(context).colorScheme.surface,
+            child: FittedBox(
+              child: Center(
+                child: Image(
+                  // Afficher la version grise (ID + 6) du même symbole
+                  image: themeAwareSymbols[gameState.gameGrid[position] + 6].image,
                 ),
               ),
             ),
-          );
+          ),
+        ),
+        onDragCompleted: () {
+          // This is called when the drag is completed and accepted by a DragTarget
+          // The target cell will handle updating the game state
+          // We don't need to clear here as that's handled in the moveSymbol method
         },
-        onWillAccept: (data) => true,
-        onAccept: (SymbolData data) {
-          // Add haptic feedback when accepting a dropped item
-          HapticFeedback.lightImpact();
-          
-          // If being dropped on itself, do nothing
-          if (data.sourcePosition == position) return;
-          
-          // If it's from another cell, move it here (replacing what's here)
-          if (data.sourcePosition >= 0 && data.sourcePosition < 25) {
-            // Clear the source cell
-            final int currentSymbol = gameState.gameGrid[position];
-            gameState.updateScore(position, data.symbolId);
-            gameState.updateScore(data.sourcePosition, 0);
-          } else {
-            // It's a new symbol from the panel
-            gameState.updateScore(position, data.symbolId);
+        onDraggableCanceled: (velocity, offset) {
+          // Check if the drag was released outside of the game grid
+          // We'll use a simple check - if the offset is very far from the grid, consider it outside
+          final gridRect = _calculateGridRect(context);
+          if (!gridRect.contains(offset)) {
+            // Add haptic feedback when dropping outside
+            HapticFeedback.mediumImpact();
+            
+            // Delete the symbol if dropped outside the grid
+            gameState.updateScore(position, 0);
           }
         },
+        child: DragTarget<SymbolData>(
+          builder: (context, accepted, rejected) {
+            return SizedBox(
+              height: gridSize,
+              width: gridSize,
+              child: Card(
+                margin: const EdgeInsets.all(2.0),
+                color: isDiagonalCell
+                    ? darkerBackground
+                    : Theme.of(context).colorScheme.surface,
+                child: FittedBox(
+                  child: Center(
+                    child: Image(
+                      // Use theme-aware symbols for the main display
+                      image: themeAwareSymbols[gameState.gameGrid[position]].image,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+          onWillAccept: (data) => true,
+          onAccept: (SymbolData data) {
+            // Add haptic feedback when accepting a dropped item
+            HapticFeedback.lightImpact();
+            
+            // If being dropped on itself, do nothing
+            if (data.sourcePosition == position) return;
+            
+            // If it's from another cell, move it here (replacing what's here)
+            if (data.sourcePosition >= 0 && data.sourcePosition < 25) {
+              // Clear the source cell
+              final int currentSymbol = gameState.gameGrid[position];
+              gameState.updateScore(position, data.symbolId);
+              gameState.updateScore(data.sourcePosition, 0);
+            } else {
+              // It's a new symbol from the panel
+              gameState.updateScore(position, data.symbolId);
+            }
+          },
+        ),
       ),
     );
   }
