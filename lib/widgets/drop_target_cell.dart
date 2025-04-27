@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Add this import
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../models/game_state.dart';
@@ -35,6 +35,22 @@ class DropTargetCell extends StatelessWidget {
 
     // Check if this is a diagonal cell
     final isDiagonalCell = (position == 4 || position == 8 || position == 12 || position == 16 || position == 20);
+    
+    // Determine cell background color
+    Color cellBackgroundColor;
+    
+    // Always make the top-left cell (position 0) grey
+    if (position == 0) {
+      cellBackgroundColor = darkerBackground;
+    } 
+    // Only apply grey background to diagonal cells when advanced rules are enabled
+    else if (isDiagonalCell && gameState.advancedRulesEnabled) {
+      cellBackgroundColor = darkerBackground;
+    } 
+    // All other cells use default background
+    else {
+      cellBackgroundColor = Theme.of(context).colorScheme.surface;
+    }
 
     // If the cell is empty, just show a DragTarget
     if (gameState.gameGrid[position] == 0) {
@@ -45,9 +61,7 @@ class DropTargetCell extends StatelessWidget {
             width: gridSize,
             child: Card(
               margin: const EdgeInsets.all(2.0),
-              color: isDiagonalCell
-                  ? darkerBackground
-                  : Theme.of(context).colorScheme.surface,
+              color: cellBackgroundColor,
               child: const FittedBox(
                 child: Center(
                   child: Image(
@@ -90,7 +104,7 @@ class DropTargetCell extends StatelessWidget {
           symbolId: gameState.gameGrid[position],
           sourcePosition: position,
         ),
-        delay: const Duration(milliseconds: 250), // Réduire le temps d'appui long à 0,5s
+        delay: const Duration(milliseconds: 250),
         dragAnchorStrategy: (draggable, context, position) {
           return Offset(draggable.feedbackOffset.dx + 70, draggable.feedbackOffset.dy + 85);
         },
@@ -104,19 +118,17 @@ class DropTargetCell extends StatelessWidget {
             ),
           ),
         ),
-        // Afficher l'icône grise à l'emplacement d'origine pendant le déplacement
+        // Show grey icon at the original location during drag
         childWhenDragging: SizedBox(
           height: gridSize,
           width: gridSize,
           child: Card(
             margin: const EdgeInsets.all(2.0),
-            color: isDiagonalCell
-                ? darkerBackground
-                : Theme.of(context).colorScheme.surface,
+            color: cellBackgroundColor,
             child: FittedBox(
               child: Center(
                 child: Image(
-                  // Afficher la version grise (ID + 6) du même symbole
+                  // Show grey version (ID + 6) of the same symbol
                   image: themeAwareSymbols[gameState.gameGrid[position] + 6].image,
                 ),
               ),
@@ -126,11 +138,9 @@ class DropTargetCell extends StatelessWidget {
         onDragCompleted: () {
           // This is called when the drag is completed and accepted by a DragTarget
           // The target cell will handle updating the game state
-          // We don't need to clear here as that's handled in the moveSymbol method
         },
         onDraggableCanceled: (velocity, offset) {
           // Check if the drag was released outside of the game grid
-          // We'll use a simple check - if the offset is very far from the grid, consider it outside
           final gridRect = _calculateGridRect(context);
           if (!gridRect.contains(offset)) {
             // Add haptic feedback when dropping outside
@@ -147,9 +157,7 @@ class DropTargetCell extends StatelessWidget {
               width: gridSize,
               child: Card(
                 margin: const EdgeInsets.all(2.0),
-                color: isDiagonalCell
-                    ? darkerBackground
-                    : Theme.of(context).colorScheme.surface,
+                color: cellBackgroundColor,
                 child: FittedBox(
                   child: Center(
                     child: Image(
@@ -191,8 +199,6 @@ class DropTargetCell extends StatelessWidget {
     final screenSize = MediaQuery.of(context).size;
     
     // Create a generous rectangle that represents the game grid area
-    // This is a simpler approach than trying to find the exact grid boundaries
-    // The grid is approximately in the center top part of the screen
     return Rect.fromLTWH(
       screenSize.width * 0.125,  // 12.5% from left
       screenSize.height * 0.125, // 12.5% from top

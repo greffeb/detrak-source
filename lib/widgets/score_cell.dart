@@ -22,6 +22,15 @@ class ScoreCell extends StatelessWidget {
         ? (screenSize.width - 20) / 7
         : (0.657 * screenSize.height - 20) / 7;
 
+    // Hide diagonal score cells in beginner mode
+    if (!gameState.advancedRulesEnabled && (scoreItemNo == 0 || scoreItemNo == 6)) {
+      return SizedBox(
+        height: gridSize,
+        width: gridSize,
+        child: const SizedBox.shrink(),
+      );
+    }
+
     final isDarkMode = theme.brightness == Brightness.dark;
     final darkerBackground = isDarkMode
         ? Color.alphaBlend(Colors.white.withAlpha(0x15), theme.colorScheme.primaryContainer)
