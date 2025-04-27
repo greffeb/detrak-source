@@ -36,6 +36,38 @@ class ScoreCell extends StatelessWidget {
       backgroundColor = theme.colorScheme.primaryContainer;
     }
 
+    // Determine what to display
+    Widget contentWidget;
+    
+    if (gameState.gameScore[scoreItemNo] != 0) {
+      // If there's a non-zero score, show it
+      contentWidget = Text(
+        gameState.gameScore[scoreItemNo].toString(),
+        style: theme.textTheme.headlineMedium?.copyWith(
+          fontSize: 25,
+          color: scoreItemNo == 12
+              ? theme.colorScheme.onPrimary
+              : theme.colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    } else if (scoreItemNo < 12 && // Don't apply to total score
+              !gameState.advancedRulesEnabled && 
+              gameState.filledLinesWithZeroScore[scoreItemNo]) {
+      // In beginner mode, if a line is filled but has no matches, show "0"
+      contentWidget = Text(
+        "0",
+        style: theme.textTheme.headlineMedium?.copyWith(
+          fontSize: 25,
+          color: theme.colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
+      );
+    } else {
+      // Otherwise show blank
+      contentWidget = const Text(" ");
+    }
+
     return SizedBox(
       height: gridSize,
       width: gridSize,
@@ -43,18 +75,7 @@ class ScoreCell extends StatelessWidget {
         margin: const EdgeInsets.all(2),
         color: backgroundColor,
         child: FittedBox(
-          child: gameState.gameScore[scoreItemNo] != 0
-              ? Text(
-                  gameState.gameScore[scoreItemNo].toString(),
-                  style: theme.textTheme.headlineMedium?.copyWith(
-                    fontSize: 25,
-                    color: scoreItemNo == 12
-                        ? theme.colorScheme.onPrimary
-                        : theme.colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-              : const Text(" "),
+          child: contentWidget,
         ),
       ),
     );

@@ -1,25 +1,35 @@
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Add this import
 
 class GameState extends ChangeNotifier {
   // Game grid with 25 cells (5x5)
   final List<int> _gameGrid = List<int>.generate(25, (int index) => 0, growable: false);
   // Score for each row, column, diagonal and total
   final List<int> _gameScore = List<int>.generate(13, (int index) => 0, growable: false);
+  // Track which lines are filled but have no matches (for display in beginner mode)
+  final List<bool> _filledLinesWithZeroScore = List<bool>.generate(12, (int index) => false, growable: false);
   // Current dice values
   final List<int> _diceValue = List<int>.generate(2, (int index) => Random().nextInt(6) + 1, growable: false);
   // Animation state
   bool _isRolling = false;
-  // Previous total score to detect significant changes
-  int _previousTotalScore = 0;
+  // Advanced rules toggle
+  bool _advancedRulesEnabled = true;
   
   // Getters to expose state
   List<int> get gameGrid => List.unmodifiable(_gameGrid);
   List<int> get gameScore => List.unmodifiable(_gameScore);
+  List<bool> get filledLinesWithZeroScore => List.unmodifiable(_filledLinesWithZeroScore);
   List<int> get diceValue => List.unmodifiable(_diceValue);
   bool get isRolling => _isRolling;
+  bool get advancedRulesEnabled => _advancedRulesEnabled;
+
+  // Toggle advanced rules
+  void toggleAdvancedRules(bool value) {
+    _advancedRulesEnabled = value;
+    _calculateAllScores(); // Recalculate scores based on new rules
+    notifyListeners();
+  }
 
   // Update score when a cell is filled
   void updateScore(int caseId, int caseValue) {
@@ -36,10 +46,6 @@ class GameState extends ChangeNotifier {
       // We're replacing a symbol with another symbol
       _gameGrid[caseId] = caseValue;
       _calculateAllScores();
-      
-      // Check if score changed significantly
-      _checkScoreChange();
-      
       notifyListeners();
       return;
     }
@@ -51,55 +57,66 @@ class GameState extends ChangeNotifier {
     // Recalculate all scores
     _calculateAllScores();
     
-    // Check if score changed significantly
-    _checkScoreChange();
-    
     notifyListeners();
-  }
-
-  // Helper method to check if score changed significantly
-  void _checkScoreChange() {
-    // If score increased by more than 2 points, provide feedback
-    if (_gameScore[12] > _previousTotalScore + 2) {
-      HapticFeedback.mediumImpact(); // Stronger vibration for significant improvement
-    } 
-    // If score decreased, provide different feedback
-    else if (_gameScore[12] < _previousTotalScore) {
-      HapticFeedback.vibrate(); // Stronger vibration for score decrease
-    }
-    
-    // Update previous score
-    _previousTotalScore = _gameScore[12];
   }
 
   // Calculate all row, column, and diagonal scores
   void _calculateAllScores() {
-    // Diagonal score
-    _gameScore[0] = _computeScore(_gameGrid[4], _gameGrid[8], _gameGrid[12], _gameGrid[16], _gameGrid[20]);
+    // Reset the filled lines tracking
+    for (int i = 0; i < _filledLinesWithZeroScore.length; i++) {
+      _filledLinesWithZeroScore[i] = false;
+    }
+    
+    // For diagonal scores, consider if advanced rules are enabled
+    if (_advancedRulesEnabled) {
+      // Diagonal score
+      _gameScore[0] = _computeScore(_gameGrid[4], _gameGrid[8], _gameGrid[12], _gameGrid[16], _gameGrid[20], 0);
+      // Diagonal score is copied to position 6
+      _gameScore[6] = _gameScore[0];
+    } else {
+      // When advanced rules are disabled, diagonal scores are set to 0
+      _gameScore[0] = 0;
+      _gameScore[6] = 0;
+      
+      // Check if the diagonal is filled but has no matches
+      bool diagonalFilled = _gameGrid[4] != 0 && _gameGrid[8] != 0 && _gameGrid[12] != 0 && 
+                           _gameGrid[16] != 0 && _gameGrid[20] != 0;
+      bool hasMatches = _hasMatches(_gameGrid[4], _gameGrid[8], _gameGrid[12], _gameGrid[16], _gameGrid[20]);
+      if (diagonalFilled && !hasMatches) {
+        _filledLinesWithZeroScore[0] = true;
+        _filledLinesWithZeroScore[6] = true;
+      }
+    }
     
     // Rows scores
-    _gameScore[1] = _computeScore(_gameGrid[0], _gameGrid[1], _gameGrid[2], _gameGrid[3], _gameGrid[4]);
-    _gameScore[2] = _computeScore(_gameGrid[5], _gameGrid[6], _gameGrid[7], _gameGrid[8], _gameGrid[9]);
-    _gameScore[3] = _computeScore(_gameGrid[10], _gameGrid[11], _gameGrid[12], _gameGrid[13], _gameGrid[14]);
-    _gameScore[4] = _computeScore(_gameGrid[15], _gameGrid[16], _gameGrid[17], _gameGrid[18], _gameGrid[19]);
-    _gameScore[5] = _computeScore(_gameGrid[20], _gameGrid[21], _gameGrid[22], _gameGrid[23], _gameGrid[24]);
-    
-    // Diagonal score is copied to position 6
-    _gameScore[6] = _gameScore[0];
+    _gameScore[1] = _computeScore(_gameGrid[0], _gameGrid[1], _gameGrid[2], _gameGrid[3], _gameGrid[4], 1);
+    _gameScore[2] = _computeScore(_gameGrid[5], _gameGrid[6], _gameGrid[7], _gameGrid[8], _gameGrid[9], 2);
+    _gameScore[3] = _computeScore(_gameGrid[10], _gameGrid[11], _gameGrid[12], _gameGrid[13], _gameGrid[14], 3);
+    _gameScore[4] = _computeScore(_gameGrid[15], _gameGrid[16], _gameGrid[17], _gameGrid[18], _gameGrid[19], 4);
+    _gameScore[5] = _computeScore(_gameGrid[20], _gameGrid[21], _gameGrid[22], _gameGrid[23], _gameGrid[24], 5);
     
     // Columns scores
-    _gameScore[7] = _computeScore(_gameGrid[0], _gameGrid[5], _gameGrid[10], _gameGrid[15], _gameGrid[20]);
-    _gameScore[8] = _computeScore(_gameGrid[1], _gameGrid[6], _gameGrid[11], _gameGrid[16], _gameGrid[21]);
-    _gameScore[9] = _computeScore(_gameGrid[2], _gameGrid[7], _gameGrid[12], _gameGrid[17], _gameGrid[22]);
-    _gameScore[10] = _computeScore(_gameGrid[3], _gameGrid[8], _gameGrid[13], _gameGrid[18], _gameGrid[23]);
-    _gameScore[11] = _computeScore(_gameGrid[4], _gameGrid[9], _gameGrid[14], _gameGrid[19], _gameGrid[24]);
+    _gameScore[7] = _computeScore(_gameGrid[0], _gameGrid[5], _gameGrid[10], _gameGrid[15], _gameGrid[20], 7);
+    _gameScore[8] = _computeScore(_gameGrid[1], _gameGrid[6], _gameGrid[11], _gameGrid[16], _gameGrid[21], 8);
+    _gameScore[9] = _computeScore(_gameGrid[2], _gameGrid[7], _gameGrid[12], _gameGrid[17], _gameGrid[22], 9);
+    _gameScore[10] = _computeScore(_gameGrid[3], _gameGrid[8], _gameGrid[13], _gameGrid[18], _gameGrid[23], 10);
+    _gameScore[11] = _computeScore(_gameGrid[4], _gameGrid[9], _gameGrid[14], _gameGrid[19], _gameGrid[24], 11);
     
     // Calculate total score
     _gameScore[12] = _gameScore.sublist(0, 12).fold(0, (sum, score) => sum + score);
   }
 
+  // Check if a line has any matches (for tracking filled lines with zero score)
+  bool _hasMatches(int a, int b, int c, int d, int e) {
+    if (a != 0 && a == b) return true;
+    if (b != 0 && b == c) return true;
+    if (c != 0 && c == d) return true;
+    if (d != 0 && d == e) return true;
+    return false;
+  }
+
   // Compute score for a line (row, column or diagonal)
-  int _computeScore(int a, int b, int c, int d, int e) {
+  int _computeScore(int a, int b, int c, int d, int e, int lineIndex) {
     // Modified to allow partially filled lines to score
     int score = 0;
     bool scored = false;
@@ -170,8 +187,19 @@ class GameState extends ChangeNotifier {
     // Check if all cells in the line are filled
     bool allFilled = a != 0 && b != 0 && c != 0 && d != 0 && e != 0;
     
-    // If all cells are filled but no matches found, return -5
-    return allFilled ? -5 : 0;
+    // If all cells are filled but no matches found
+    if (allFilled) {
+      if (_advancedRulesEnabled) {
+        // In advanced mode, return -5
+        return -5;
+      } else {
+        // In beginner mode, mark this line as filled with zero score
+        _filledLinesWithZeroScore[lineIndex] = true;
+        return 0;
+      }
+    }
+    
+    return 0;
   }
 
   // Move a symbol from one cell to another
@@ -190,9 +218,6 @@ class GameState extends ChangeNotifier {
     
     // Recalculate scores
     _calculateAllScores();
-    
-    // Check if score changed significantly
-    _checkScoreChange();
     
     notifyListeners();
   }
@@ -238,19 +263,12 @@ class GameState extends ChangeNotifier {
 
   // Clear the game grid and scores
   void clearGrid() {
-    // Add haptic feedback when clearing the grid
-    HapticFeedback.heavyImpact();
-    
     for (int i = 0; i < _gameScore.length; i++) {
       _gameScore[i] = 0;
     }
     for (int i = 0; i < _gameGrid.length; i++) {
       _gameGrid[i] = 0;
     }
-    
-    // Reset previous score
-    _previousTotalScore = 0;
-    
     notifyListeners();
   }
 
